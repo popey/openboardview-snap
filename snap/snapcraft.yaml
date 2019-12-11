@@ -1,0 +1,89 @@
+name: openboardview
+base: core18
+version: '10.1'
+summary: View boardfiles for Macbook, PC, Phones and many other devices
+description: |
+  Linux SDL/ImGui edition software for viewing .brd files, intended as a drop-in
+  replacement for the "Test_Link" software and "Landrex".
+
+grade: stable
+confinement: strict
+
+apps:
+  openboardview:
+    command: bin/openboardview
+    desktop: share/applications/openboardview.desktop
+    extensions: [gnome-3-28]
+    plugs:
+      - opengl
+      - home
+      - removable-media
+      - gsettings
+      - mount-observe
+      - screen-inhibit-control
+
+parts:
+  openboardview:
+    source: https://github.com/inflex/OpenBoardView.git
+    plugin: cmake
+    source-tag: "$SNAPCRAFT_PROJECT_VERSION"
+    override-pull: |
+      set -eu
+      snapcraftctl pull
+      last_committed_tag="$(git describe --tags --abbrev=0)"
+      last_committed_tag_ver="$(echo ${last_committed_tag} | sed 's/v//')"
+      last_released_tag="$(snap info $SNAPCRAFT_PROJECT_NAME | awk '$1 == "beta:" { print $2 }')"
+      # If the latest tag from the upstream project has not been released to
+      # beta, build that tag instead of master.
+      if [ "${last_committed_tag_ver}" != "${last_released_tag}" ]; then
+        git fetch
+        git checkout "${last_committed_tag}"
+        cd ../src
+        git checkout "${last_committed_tag}"
+      fi
+      snapcraftctl set-version $(git -C ../src describe --tags  | sed 's/v//')
+    override-build: |
+      snapcraftctl build
+      sed -i 's|Icon=openboardview|Icon=share/icons/hicolor/scalable/apps/openboardview\.svg|' ${SNAPCRAFT_PART_INSTALL}/share/applications/openboardview.desktop
+    build-packages:
+      - git
+      - build-essential
+      - cmake
+      - libsdl2-dev
+      - libgtk-3-dev
+      - libegl1-mesa-dev
+      - libgles2-mesa-dev
+    stage-packages:
+      - libasound2
+      - libasyncns0
+      - libflac8
+      - libfontconfig1
+      - libfreetype6
+      - libogg0
+      - libpng16-16
+      - libpulse0
+      - libsdl2-2.0-0
+      - libsndfile1
+      - libsndio6.1
+      - libvorbis0a
+      - libvorbisenc2
+      - libwayland-client0
+      - libwayland-cursor0
+      - libwayland-egl1
+      - libx11-6
+      - libxau6
+      - libxcb1
+      - libxcursor1
+      - libxdmcp6
+      - libxext6
+      - libxfixes3
+      - libxi6
+      - libxinerama1
+      - libxkbcommon0
+      - libxrandr2
+      - libxrender1
+      - libxss1
+      - libxxf86vm1
+      - libgl1-mesa-dri
+      - libgl1-mesa-glx
+      - libglu1-mesa
