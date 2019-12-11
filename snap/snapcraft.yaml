@@ -1,6 +1,6 @@
 name: openboardview
 base: core18
-version: '10.1'
+adopt-info: openboardview
 summary: View boardfiles for Macbook, PC, Phones and many other devices
 description: |
   Linux SDL/ImGui edition software for viewing .brd files, intended as a drop-in
@@ -26,7 +26,6 @@ parts:
   openboardview:
     source: https://github.com/inflex/OpenBoardView.git
     plugin: cmake
-    source-tag: "$SNAPCRAFT_PROJECT_VERSION"
     override-pull: |
       set -eu
       snapcraftctl pull
